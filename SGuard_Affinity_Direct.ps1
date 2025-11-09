@@ -1,21 +1,26 @@
+﻿# ACE 反作弊程序亲和力压制工具
+# 作者：阿政
+# 功能：运行时自动降低优先级与 CPU 相关性
+
+# ========== 全局函数定义（移至此处，确保调用前可用） ==========
 function Show-Menu {
     param([string]$Exist)
-	"########################################"
-	"#"
-	"# 欢迎使用由阿政倾情制作的PowerShell脚本"
-	"#"
-	"# 脚本功能：ACE反作弊程序运行时自动降低优先级与CPU相关性"
-	"#"
-	"########################################"
+	"`n ########################################"
+	" #"
+	" # 欢迎使用由阿政倾情制作的PowerShell脚本"
+	" #"
+	" # 脚本功能：ACE反作弊程序运行时自动降低优先级与CPU相关性"
+	" #"
+	" ########################################"
     if ($Exist -eq "True") {
-        "`n1.覆盖重装(回车默认)"
-        "`n2.卸载"
-        "`n3.GitHub"
-        "`n4.退出"
+        "`n 1.覆盖重装(回车默认)"
+        "`n 2.卸载"
+        "`n 3.GitHub"
+        "`n 4.退出"
     } else {
-        "`n1.安装(回车默认)"
-        "`n2.GitHub"
-        "`n3.退出"
+        "`n 1.安装(回车默认)"
+        "`n 2.GitHub"
+        "`n 3.退出"
     }
 }
 
@@ -34,8 +39,8 @@ powershell -NoP -C "Get-Process SGuardSvc64 | %%{$_.ProcessorAffinity = 0x80000L
     New-Item -ItemType Directory -Force $script:Dir | Out-Null
     Set-Content -Path (Join-Path $script:Dir $Files[0]) -Value $BatContent64 -Encoding ASCII
     Set-Content -Path (Join-Path $script:Dir $Files[1]) -Value $BatContentSvc64 -Encoding ASCII
-    Write-Host "✅ bat文件已创建" -ForegroundColor Green
-    "文件所在目录:`n$script:Dir #ACE程序所在目录"
+    Write-Host " ✅ bat文件已创建" -ForegroundColor Green
+    " 文件所在目录:`n$script:Dir #ACE程序所在目录"
 }
 
 function New-AffinityTask {
@@ -89,9 +94,9 @@ function Do-CommonWork {
 
     # 启用审计和任务历史
     auditpol /set /subcategory:'{0CCE922B-69AE-11D9-BED3-505054503030}' /success:enable | Out-Null
-    Write-Host "✅ 进程创建审计已启用" -ForegroundColor Green
+    Write-Host " ✅ 进程创建审计已启用" -ForegroundColor Green
     wevtutil set-log Microsoft-Windows-TaskScheduler/Operational /enabled:true /quiet
-    Write-Host "✅ 任务历史记录已启用" -ForegroundColor Green
+    Write-Host " ✅ 任务历史记录已启用" -ForegroundColor Green
 
     # 创建 BAT 文件
     New-AffinityBatFile -Dir $Dir -Files $Files
@@ -100,8 +105,8 @@ function Do-CommonWork {
     New-AffinityTask -TaskName $Tasks[0] -ProcessName 'SGuard64' -BatFile $Files[0]
     New-AffinityTask -TaskName $Tasks[1] -ProcessName 'SGuardSvc64' -BatFile $Files[1]
 
-    Write-Host "✅ 事件任务创建成功" -ForegroundColor Green
-    Write-Host "压制ACE成功，又少一个打不过对面的理由" -ForegroundColor Green
+    Write-Host " ✅ 事件任务创建成功" -ForegroundColor Green
+    Write-Host " 压制ACE成功，又少一个打不过对面的理由" -ForegroundColor Green
 }
 
 function Uninstall-Affinity {
@@ -128,8 +133,8 @@ while ($true) {
         Start-Process powershell.exe "-NoExit -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
         exit
     }
-	"正在初始化......"
     Clear-Host
+    "`n 获取脚本信息......"
     $RawUI = $Host.UI.RawUI
     $RawUI.BufferSize = New-Object System.Management.Automation.Host.Size($RawUI.WindowSize.Width, $RawUI.WindowSize.Height)
 
@@ -137,7 +142,7 @@ while ($true) {
     $Dir = 'C:\Program Files\AntiCheatExpert\SGuard\x64'
     $Files = @('SGuard64_Affinity_Direct.bat', 'SGuardSvc64_Affinity_Direct.bat')
     $Tasks = @('SGuard64_Affinity_Direct', 'SGuardSvc64_Affinity_Direct')
-
+	
     # 文件检测
     $FileExist = ($Files | ForEach-Object { Test-Path (Join-Path $Dir $_) }) -contains $true
 
@@ -146,12 +151,12 @@ while ($true) {
 
     # 判断是否存在
     $Exist = if ($FileExist -or $TaskExist) { "True" } else { "False" }
-
+	Clear-Host
     # 显示菜单（现在函数已预定义）
     Show-Menu -Exist $Exist
 
     # ========== 主流程 ==========
-    $choice = (Read-Host "`n请输入操作").Trim().ToUpper()
+    $choice = (Read-Host "`n 请输入操作").Trim().ToUpper()
 
     switch ($choice) {
         '1' { Do-CommonWork -Dir $Dir -Files $Files -Tasks $Tasks; break }
@@ -179,6 +184,4 @@ while ($true) {
         }
         '' { Do-CommonWork -Dir $Dir -Files $Files -Tasks $Tasks; break }  # 空输入默认安装/覆盖
     }
-
 }
-
