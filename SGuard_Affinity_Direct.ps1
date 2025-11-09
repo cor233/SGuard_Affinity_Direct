@@ -1,8 +1,3 @@
-﻿# ACE 反作弊程序亲和力压制工具
-# 作者：阿政
-# 功能：运行时自动降低优先级与 CPU 相关性
-
-# ========== 全局函数定义（移至此处，确保调用前可用） ==========
 function Show-Menu {
     param([string]$Exist)
 	"`n ########################################"
@@ -184,4 +179,5 @@ while ($true) {
         }
         '' { Do-CommonWork -Dir $Dir -Files $Files -Tasks $Tasks; break }  # 空输入默认安装/覆盖
     }
+
 }
