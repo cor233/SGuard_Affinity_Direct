@@ -4,7 +4,8 @@ function Show-Menu {
 	" #"
 	" # 欢迎使用由阿政倾情制作的PowerShell脚本"
 	" #"
-	" # 脚本功能：ACE反作弊程序全自动后台零感知降低优先级与CPU相关性"
+	" # 脚本功能：ACE反作弊程序后台自动降低优先级与CPU相关性"
+	" # 优化程序：SGuard64.exe  SGuardSvc64.exe"
 	" #"
 	" ########################################"
     if ($Exist -eq "True") {
@@ -180,5 +181,6 @@ while ($true) {
     }
 
 }
+
 
 
