@@ -1,0 +1,2 @@
+@echo off
+powershell -NoExit -Command "$uri='https://gh-proxy.com/https://github.com/aznb6666/SGuard_Affinity_Direct/blob/main/SGuard_Affinity_Direct.ps1';[IO.File]::WriteAllText(\"$env:TEMP\run.ps1\",(Invoke-RestMethod -Uri $uri -UseBasicParsing),[Text.Encoding]::UTF8);& \"$env:TEMP\run.ps1\""
