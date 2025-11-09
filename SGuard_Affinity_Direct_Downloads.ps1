@@ -1,0 +1,1 @@
+﻿irm 'https://raw.githubusercontent.com/aznb6666/SGuard_Affinity_Direct/main/SGuard_Affinity_Direct.ps1' -OutFile "$env:TEMP\run.ps1" -UseBasicParsing; & "$env:TEMP\run.ps1"
