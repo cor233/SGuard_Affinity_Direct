@@ -1,5 +1,6 @@
 function Show-Menu {
     param([string]$Exist)
+    Clear-Host
 	"`n ########################################"
 	" # "
 	" # 欢迎使用由阿政倾情制作的PowerShell脚本"
@@ -102,7 +103,9 @@ function Do-CommonWork {
     New-AffinityTask -TaskName $Tasks[1] -ProcessName 'SGuardSvc64' -BatFile $Files[1]
 
     Write-Host " ✅ 事件任务创建成功" -ForegroundColor Green
-    Write-Host " 压制ACE成功，又少一个打不过对面的理由" -ForegroundColor Green
+    Write-Host " 制裁ACE成功，又少一个打不过对面的理由" -ForegroundColor Green
+    Read-Host "`n 按回车返回菜单"
+    break
 }
 
 function Uninstall-Affinity {
@@ -112,11 +115,14 @@ function Uninstall-Affinity {
     foreach ($f in $Files) {
         Remove-Item (Join-Path $Dir $f) -Force -ErrorAction SilentlyContinue
     }
+    Write-Host " ✅ BAT文件已删除" -ForegroundColor Green
 
     # 删除任务
     foreach ($t in $Tasks) {
         Unregister-ScheduledTask -TaskName $t -Confirm:$false -ErrorAction SilentlyContinue
     }
+    Write-Host " ✅ 事件任务已删除" -ForegroundColor Green
+    Read-Host "`n 按回车返回菜单"
 }
 
 # ========== 主循环 ==========
@@ -131,6 +137,11 @@ while ($true) {
     }
     Clear-Host
     "`n 获取脚本信息......"
+    $Protocol   = "https:"
+	$Domain     = "//github.com"
+	$Owner      = "aznb6666"
+	$Repo       = "SGuard_Affinity_Direct"
+	$repoUrl    = $Protocol + $Domain + "/" + $Owner + "/" + $Repo
     $RawUI = $Host.UI.RawUI
     $RawUI.BufferSize = New-Object System.Management.Automation.Host.Size($RawUI.WindowSize.Width, $RawUI.WindowSize.Height)
 
@@ -147,7 +158,6 @@ while ($true) {
 
     # 判断是否存在
     $Exist = if ($FileExist -or $TaskExist) { "True" } else { "False" }
-	Clear-Host
     # 显示菜单（现在函数已预定义）
     Show-Menu -Exist $Exist
 
@@ -160,13 +170,13 @@ while ($true) {
             if ($Exist -ieq "True") {
                 Uninstall-Affinity -Dir $Dir -Files $Files -Tasks $Tasks
             } else {
-                Start-Process "https://github.com/aznb6666/SGuard_Affinity_Direct"
+                Start-Process $repoUrl
             }
             break
         }
         '3' {
             if ($Exist -ieq "True") {
-                Start-Process "https://github.com/aznb6666/SGuard_Affinity_Direct"
+                Start-Process $repoUrl
             } else {
                 # 退出脚本
                 Get-Process -Id $PID | Stop-Process -Force
