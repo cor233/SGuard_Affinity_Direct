@@ -128,45 +128,13 @@ function Uninstall-Affinity {
 # ========== 主循环 ==========
 while ($true) {
     # 设置窗口大小
-    $wantW = 60
-	$wantH = 30
-	
-	try {
-	    # 先温柔地改当前窗口
-	    $buf = $Host.UI.RawUI.BufferSize
-	    if ($buf.Width  -gt $wantW) { $buf.Width  = $wantW }
-	    if ($buf.Height -gt $wantH) { $buf.Height = $wantH }
-	    $Host.UI.RawUI.BufferSize = $buf
-	    $Host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size($wantW, $wantH)
-	} catch {
-	    # 改不了就起个新 60×30 窗口继续跑
-	    $code = $MyInvocation.MyCommand.ScriptBlock.ToString()
-	    $arg  = "-NoExit -Command `$code"   # -NoExit 调试用，正式发版可去掉
-	
-	    # 判断要不要带管理员 Verb
-	    $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-	    $splat   = @{
-	        FilePath               = 'powershell.exe'
-	        ArgumentList           = $arg
-	        WindowStyle            = 'Normal'
-	        WorkingDirectory       = $PWD.Path
-	    }
-	    if (-not $isAdmin) { $splat['Verb'] = 'RunAs' }   # 普通用户才需要 RunAs
-	
-	    Start-Process @splat
-	    exit
-	}
+    $Host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(60, 30)
 
     # 权限检测
-    if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    # 这里-string 把整段脚本源码当文本传过去
     $source = @'
 '@ + $MyInvocation.MyCommand.ScriptBlock.ToString() + @'
 '@
-    # 用 -Command 重新执行；加 -NoExit 方便调试，正式用可去掉
-    Start-Process powershell.exe -ArgumentList '-NoExit','-Command',$source -Verb RunAs
-    exit
-}
+	Start-Process powershell.exe -ArgumentList '-NoExit','-Command',$source -Verb RunAs -WindowStyle Normal
     Clear-Host
     "`n 获取脚本信息......"
     $Protocol   = "https:"
@@ -225,4 +193,5 @@ while ($true) {
 
 
 }
+
 
