@@ -131,10 +131,18 @@ while ($true) {
     $Host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(60, 30)
 
     # 权限检测
-    if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-        Start-Process powershell.exe "-NoExit -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
-        exit
-    }
+    if (-not ([Security.Principal.WindowsPrincipal]`
+          [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
+              [Security.Principal.WindowsBuiltInRole]::Administrator)) {
+
+    # 把整段脚本内容读出来，Base64 编码后通过 -EncodedCommand 传递
+    $code = $MyInvocation.MyCommand.ScriptContents
+    $bytes = [System.Text.Encoding]::Unicode.GetBytes($code)
+    $b64   = [System.Convert]::ToBase64String($bytes)
+
+    Start-Process powershell.exe -ArgumentList "-NoExit","-EncodedCommand",$b64 -Verb RunAs
+    exit
+}
     Clear-Host
     "`n 获取脚本信息......"
     $Protocol   = "https:"
@@ -192,6 +200,7 @@ while ($true) {
     }
 
 }
+
 
 
 
