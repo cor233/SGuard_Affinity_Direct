@@ -131,13 +131,10 @@ while ($true) {
     $Host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(60, 30)
 
     # 权限检测
-    # 提权：重新运行当前脚本内容（适用于 irm | iex）
-	if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-		$scriptContent = $MyInvocation.MyCommand.ScriptContents
-		if (-not $scriptContent) {        # 兼容旧版 PowerShell
-			Write-Host ' ❌ 请以管理员身份运行此脚本' -ForegroundColor Red
-			Read-Host; exit
-		}
+   if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+        Start-Process powershell.exe "-NoExit -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
+        exit
+    }
 		# Base64 编码后提权运行
 		$bytes = [System.Text.Encoding]::Unicode.GetBytes($scriptContent)
 		$encoded = [Convert]::ToBase64String($bytes)
@@ -199,5 +196,6 @@ while ($true) {
         }
         '' { Do-CommonWork -Dir $Dir -Files $Files -Tasks $Tasks; break }  # 空输入默认安装/覆盖
     }
+
 
 }
