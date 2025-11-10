@@ -135,8 +135,8 @@ while ($true) {
     # 直接往下走，不再开无限窗
 	} else {
 	    $source = @'
-	'@ + $MyInvocation.MyCommand.ScriptBlock.ToString() + @'
-	'@
+'@ + $MyInvocation.MyCommand.ScriptBlock.ToString() + @'
+'@
 	    # 把 -newWindow 塞进去，当标记
 	    Start-Process powershell.exe -ArgumentList '-NoExit','-Command',$source,'-newWindow' -Verb RunAs -WindowStyle Normal
 	    exit
@@ -198,4 +198,5 @@ while ($true) {
     }
 
 }
+
 
