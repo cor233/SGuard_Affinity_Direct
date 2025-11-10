@@ -134,13 +134,13 @@ while ($true) {
     if ($args -contains '-newWindow') {
     # 直接往下走，不再开无限窗
 	} else {
-	    $source = @'
+	$source = @'
 '@ + $MyInvocation.MyCommand.ScriptBlock.ToString() + @'
 '@
-	    # 把 -newWindow 塞进去，当标记
-	    Start-Process powershell.exe -ArgumentList '-NoExit','-Command',$source,'-newWindow' -Verb RunAs -WindowStyle Normal
-	    exit
-	}
+	# 把 -newWindow 塞进去，当标记
+	Start-Process powershell.exe -ArgumentList '-NoExit','-Command',$source,'-newWindow' -Verb RunAs -WindowStyle Normal
+	exit
+}
     Clear-Host
     "`n 获取脚本信息......"
     $Protocol   = "https:"
@@ -198,5 +198,6 @@ while ($true) {
     }
 
 }
+
 
 
