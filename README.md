@@ -5,5 +5,5 @@
 - 调整目标程序：SGuard64.exe SGuardSvc64.exe
 ### 你可以使用powershell输入以下命令一键在线运行此脚本(无需下载)
 `irm https://monojson.com/s/2XOJ9 | iex`
-### 也可以通过.bat文件保存为文件
+### 也可以通过.bat保存为文件
 [ACE_Affinity_Direct.bat](https://gh-proxy.com/https://github.com/aznb6666/SGuard_Affinity_Direct/blob/main/ACE_Affinity_Direct.bat "ACE_Affinity_Direct.bat")
