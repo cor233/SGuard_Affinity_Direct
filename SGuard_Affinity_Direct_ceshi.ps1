@@ -135,12 +135,6 @@ while ($true) {
         Start-Process powershell.exe "-NoExit -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
         exit
     }
-		# Base64 编码后提权运行
-		$bytes = [System.Text.Encoding]::Unicode.GetBytes($scriptContent)
-		$encoded = [Convert]::ToBase64String($bytes)
-		Start-Process powershell.exe "-NoExit -EncodedCommand $encoded" -Verb RunAs
-		exit
-	}
     Clear-Host
     "`n 获取脚本信息......"
     $Protocol   = "https:"
@@ -199,3 +193,4 @@ while ($true) {
 
 
 }
+
