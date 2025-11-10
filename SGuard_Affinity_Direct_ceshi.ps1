@@ -137,7 +137,7 @@ while ($true) {
 '@ + $MyInvocation.MyCommand.ScriptBlock.ToString() + @'
 '@
     # 用 -Command 重新执行；加 -NoExit 方便调试，正式用可去掉
-    Start-Process powershell.exe -ArgumentList '-Command',$source -Verb RunAs
+    Start-Process powershell.exe -ArgumentList '-NoExit','-Command',$source -Verb RunAs
     exit
 }
     Clear-Host
@@ -196,8 +196,4 @@ while ($true) {
         '' { Do-CommonWork -Dir $Dir -Files $Files -Tasks $Tasks; break }  # 空输入默认安装/覆盖
     }
 
-
 }
-
-
-
