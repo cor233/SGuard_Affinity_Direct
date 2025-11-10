@@ -131,15 +131,15 @@ while ($true) {
     $Host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(60, 30)
 
     # 权限检测
-	if ($args -contains '-newWindow') {
-	    # 直接往下走，不再开无限窗
+	if ([Environment]::GetEnvironmentVariable('_SGUARD_NEW_WIN','Process') -eq '1') {
+	    # 直接往下走
 	} else {
+	    [Environment]::SetEnvironmentVariable('_SGUARD_NEW_WIN','1','Process')
 	    $source = @'
 '@ + $MyInvocation.MyCommand.ScriptBlock.ToString() + @'
 '@
-	    # 把 -newWindow 塞进去，当标记
-	    Start-Process powershell.exe -ArgumentList '-NoExit','-Command',$source,'-newWindow' -Verb RunAs -WindowStyle Normal
-	    exit
+	    Start-Process powershell.exe -ArgumentList '-NoExit','-Command',$source -Verb RunAs -WindowStyle Normal
+	    exit   # 老窗口关闭
 	}
     Clear-Host
     "`n 获取脚本信息......"
@@ -198,6 +198,7 @@ while ($true) {
     }
 
 }
+
 
 
 
