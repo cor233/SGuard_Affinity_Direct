@@ -1,3 +1,50 @@
+# ---------- 预设控制台尺寸 ----------
+$tmpSize = 60,30
+$regPath = 'HKCU:\Console\%SystemRoot%_System32_WindowsPowerShell_v1.0_powershell.exe'
+$bakPath = 'HKCU:\Console\_backup'          # 用来暂存系统原值
+
+# 如果原来有值，先备份；没有就备份空
+if (Test-Path $regPath) {
+    New-Item $bakPath -Force | Out-Null
+    Copy-ItemProperty $regPath WindowSize       -Dest $bakPath -EA SilentlyContinue
+    Copy-ItemProperty $regPath ScreenBufferSize -Dest $bakPath -EA SilentlyContinue
+} else {
+    New-Item $bakPath -Force | Out-Null
+    Set-ItemProperty $bakPath WindowSize       -1
+    Set-ItemProperty $bakPath ScreenBufferSize -1
+}
+
+# 写入临时默认值
+New-Item $regPath -Force | Out-Null
+Set-ItemProperty $regPath WindowSize       ($tmpSize[1]*65536 + $tmpSize[0])
+Set-ItemProperty $regPath ScreenBufferSize ($tmpSize[1]*65536 + $tmpSize[0])
+
+# ---------- 提权 ----------
+$markName = '_SGuard_NewWin'
+if ([Environment]::GetEnvironmentVariable($markName,'User') -eq '1') {
+    [Environment]::SetEnvironmentVariable($markName,$null,'User')
+
+    # ======== 高权窗口已弹出，第一时间还原默认 ========
+    if ((Get-ItemProperty $bakPath WindowSize -EA 0).WindowSize -eq -1) {
+        # 原来就没有值，直接删
+        Remove-Item $regPath -Recurse -Force -EA SilentlyContinue
+    } else {
+        # 恢复原来值
+        Copy-ItemProperty $bakPath WindowSize       -Dest $regPath -Force
+        Copy-ItemProperty $bakPath ScreenBufferSize -Dest $regPath -Force
+    }
+    Remove-Item $bakPath -Recurse -Force -EA SilentlyContinue
+    # 至此注册表已还原，后续普通窗口不再受影响
+} else {
+    [Environment]::SetEnvironmentVariable($markName,'1','User')
+    # 把当前脚本内容原样传过去
+    $src = @'
+'@ + $MyInvocation.MyCommand.ScriptBlock.ToString() + @'
+'@
+    Start-Process powershell.exe -ArgumentList '-NoExit','-Command',$src -Verb RunAs -WindowStyle Normal
+    exit
+}
+
 function Show-Menu {
     param([string]$Exist)
     Clear-Host
@@ -127,21 +174,8 @@ function Uninstall-Affinity {
 
 # ========== 主循环 ==========
 while ($true) {
-    # 设置窗口大小
-    $Host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(60, 30)
-
-    # 权限检测
-    if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
-    # 这里-string 把整段脚本源码当文本传过去
-    $source = @'
-'@ + $MyInvocation.MyCommand.ScriptBlock.ToString() + @'
-'@
-    # 用 -Command 重新执行；加 -NoExit 方便调试，正式用可去掉
-    Start-Process powershell.exe -ArgumentList '-NoExit','-Command',$source -Verb RunAs
-    exit
-}
-    Clear-Host
-    "`n 获取脚本信息......"
+	Clear-Host
+	"`n 获取脚本信息......"
     $Protocol   = "https:"
 	$Domain     = "//github.com"
 	$Owner      = "aznb6666"
