@@ -126,7 +126,7 @@ function Uninstall-Affinity {
     Read-Host "`n 按回车返回菜单"
 }
 
-$markName = "_SGuard_NewWin_$($oldPid ? $oldPid : $PID)"
+$markName = "_SGuard_NewWin_" + $(if ($oldPid -ne 0) { $oldPid } else { $PID })
 
 # 废变量清理（同前）
 Get-ChildItem Env: | Where-Object {
@@ -214,6 +214,7 @@ while ($true) {
     }
 
 }
+
 
 
 
