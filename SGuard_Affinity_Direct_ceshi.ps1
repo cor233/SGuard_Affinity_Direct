@@ -131,16 +131,13 @@ while ($true) {
     $Host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(60, 30)
 
     # 权限检测
-    if (-not ([Security.Principal.WindowsPrincipal]`
-          [Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole(
-              [Security.Principal.WindowsBuiltInRole]::Administrator)) {
-
-    # 把整段脚本内容读出来，Base64 编码后通过 -EncodedCommand 传递
-    $code = $MyInvocation.MyCommand.ScriptContents
-    $bytes = [System.Text.Encoding]::Unicode.GetBytes($code)
-    $b64   = [System.Convert]::ToBase64String($bytes)
-
-    Start-Process powershell.exe -ArgumentList "-NoExit","-EncodedCommand",$b64 -Verb RunAs
+    if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    # 这里-string 把整段脚本源码当文本传过去
+    $source = @'
+'@ + $MyInvocation.MyCommand.ScriptBlock.ToString() + @'
+'@
+    # 用 -Command 重新执行；加 -NoExit 方便调试，正式用可去掉
+    Start-Process powershell.exe -ArgumentList '-NoExit','-Command',$source -Verb RunAs
     exit
 }
     Clear-Host
@@ -200,6 +197,7 @@ while ($true) {
     }
 
 }
+
 
 
 
