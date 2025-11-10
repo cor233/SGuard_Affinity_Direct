@@ -1,3 +1,4 @@
+$Host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(60, 30)
 $markName = '_SGuard_NewWin'
 # 读 User 级变量（跨进程可见）
 if ([Environment]::GetEnvironmentVariable($markName, 'User') -eq '1') {
@@ -142,7 +143,7 @@ function Uninstall-Affinity {
 # ========== 主循环 ==========
 while ($true) {
     # 设置窗口大小
-    $Host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(60, 30)
+    
 
 
     Clear-Host
@@ -202,4 +203,5 @@ while ($true) {
     }
 
 }
+
 
