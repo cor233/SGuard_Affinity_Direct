@@ -1,17 +1,48 @@
-$Host.UI.RawUI.WindowSize = New-Object System.Management.Automation.Host.Size(60, 30)
-$markName = '_SGuard_NewWin'
-# 读 User 级变量（跨进程可见）
-if ([Environment]::GetEnvironmentVariable($markName, 'User') -eq '1') {
-	# 第二次进来：清掉标记，继续跑
-	[Environment]::SetEnvironmentVariable($markName, $null, 'User')
+# ---------- 预设控制台尺寸 ----------
+$tmpSize = 60,30
+$regPath = 'HKCU:\Console\%SystemRoot%_System32_WindowsPowerShell_v1.0_powershell.exe'
+$bakPath = 'HKCU:\Console\_backup'          # 用来暂存系统原值
+
+# 如果原来有值，先备份；没有就备份空
+if (Test-Path $regPath) {
+    New-Item $bakPath -Force | Out-Null
+    Copy-ItemProperty $regPath WindowSize       -Dest $bakPath -EA SilentlyContinue
+    Copy-ItemProperty $regPath ScreenBufferSize -Dest $bakPath -EA SilentlyContinue
 } else {
-	# 第一次：写标记 → 起管理员窗 → 老进程退出
-	[Environment]::SetEnvironmentVariable($markName, '1', 'User')
-	$source = @'
+    New-Item $bakPath -Force | Out-Null
+    Set-ItemProperty $bakPath WindowSize       -1
+    Set-ItemProperty $bakPath ScreenBufferSize -1
+}
+
+# 写入临时默认值
+New-Item $regPath -Force | Out-Null
+Set-ItemProperty $regPath WindowSize       ($tmpSize[1]*65536 + $tmpSize[0])
+Set-ItemProperty $regPath ScreenBufferSize ($tmpSize[1]*65536 + $tmpSize[0])
+
+# ---------- 提权 ----------
+$markName = '_SGuard_NewWin'
+if ([Environment]::GetEnvironmentVariable($markName,'User') -eq '1') {
+    [Environment]::SetEnvironmentVariable($markName,$null,'User')
+
+    # ======== 高权窗口已弹出，第一时间还原默认 ========
+    if ((Get-ItemProperty $bakPath WindowSize -EA 0).WindowSize -eq -1) {
+        # 原来就没有值，直接删
+        Remove-Item $regPath -Recurse -Force -EA SilentlyContinue
+    } else {
+        # 恢复原来值
+        Copy-ItemProperty $bakPath WindowSize       -Dest $regPath -Force
+        Copy-ItemProperty $bakPath ScreenBufferSize -Dest $regPath -Force
+    }
+    Remove-Item $bakPath -Recurse -Force -EA SilentlyContinue
+    # 至此注册表已还原，后续普通窗口不再受影响
+} else {
+    [Environment]::SetEnvironmentVariable($markName,'1','User')
+    # 把当前脚本内容原样传过去
+    $src = @'
 '@ + $MyInvocation.MyCommand.ScriptBlock.ToString() + @'
 '@
-	Start-Process powershell.exe -ArgumentList '-NoExit','-Command',$source -Verb RunAs -WindowStyle Normal
-	exit
+    Start-Process powershell.exe -ArgumentList '-NoExit','-Command',$src -Verb RunAs -WindowStyle Normal
+    exit
 }
 
 function Show-Menu {
@@ -200,6 +231,7 @@ while ($true) {
     }
 
 }
+
 
 
 
